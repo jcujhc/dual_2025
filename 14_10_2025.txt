@@ -1,0 +1,23 @@
+
+
+[oracle@jcuj ~]$ ps -ef|grep -i pmon
+oracle     72303       1  0 Oct01 ?        00:01:10 ora_pmon_tDB2
+oracle    985397  985343  0 09:22 pts/2    00:00:00 grep --color=auto -i pmon
+ 
+[oracle@jcuj ~]$ sqlplus '/as sysdba'
+bash: sqlplus: command not found...
+ 
+export ORACLE_HOME=/u01/app/oracle/product/19c
+
+[oracle@jcuj ~]$ export PATH=$PATH:/u01/app/oracle/product/19c/bin
+[oracle@jcuj ~]$ echo $PATH
+[oracle@jcuj ~]$ sqlplus
+
+SQL*Plus: Release 19.0.0.0.0 - Production on Tue Oct 14 09:24:07 2025
+Version 19.3.0.0.0
+
+Copyright (c) 1982, 2019, Oracle.  All rights reserved.
+
+Enter user-name:
+
+
