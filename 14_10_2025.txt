@@ -21,3 +21,11 @@ Copyright (c) 1982, 2019, Oracle.  All rights reserved.
 Enter user-name:
 
 
+[oracle@jcuj ~]$ export ORACLE_HOME=/u01/app/oracle/product/19c
+[oracle@jcuj ~]$ export PATH=$PATH:/u01/app/oracle/product/19c/bin
+[oracle@jcuj ~]$ export ORACLE_SID=tDB2
+[oracle@jcuj ~]$ sqlplus '/as sysdba'
+
+
+
+
