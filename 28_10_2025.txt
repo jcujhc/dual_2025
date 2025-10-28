@@ -7,6 +7,45 @@ RANNA ROZCVICKA
 3/ pomocou pohladu dba_users skuste zistit aky useri boli vytvoreny by default po vytvoreni databazy
 
 
+# STATUS LISTENERA
+ps -ef | grep tns
+lsnrctl start LISTENER_tDB2 
+lsnrctl status LISTENER_tDB2
+ 
+
+# CREATE USER 
+CREATE USER books_admin IDENTIFIED BY MyPassword;
+desc dba_users
+col USERNAME for a15
+select username, ORACLE_MAINTAINED from dba_users;
+
+
+sqlplus trulo/Start123@//10.202.0.198:51521/tDB2
+# Firewall issue 
+ps -ef | grep firewa 
+systemctl stop firewalld.service
+# Create session issue
+grant create session to trulo;
+
+# check users in DB
+select username from v$session where username like 'TRULO';
+
+# Create table issue
+grant create table to trulo;
+create table t1(id number);
+
+# Quora on tablespace issue
+ALTER USER TRULO QUOTA 100M ON USERS;
+insert into NIKITA2 values(1);
+commit; / rollback;
+
+
+
+ 
+
+
+
+
 ------------------------------------------------------------------------------------------------------------------
 [oracle@jcuj ~]$ cat .bash_profile
 # User specific environment and startup programs
