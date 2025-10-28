@@ -62,7 +62,8 @@ alias r+="rlwrap -H ~/.sqlplus_history sqlplus '/as sysdba'"
 
 
 ## CREATE USER (?)
-
+## ULOHA
+Vytvoret usera APPADM vo sojej DB a pridelte mu prava na tablespace, vytvoreni tabulky a prihlasei do DB
 
 
 JAZYK SQL
