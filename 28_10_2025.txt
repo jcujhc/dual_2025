@@ -33,6 +33,30 @@ alias r+="rlwrap -H ~/.sqlplus_history sqlplus '/as sysdba'"
 
 
 
+JAZYK SQL
+-------------------------------------------------------------------------------------
+Základné syntaktické konštrukcie jazyka SQL sa rozdeľujú do 5 zákl. skupín:
+
+1.	DML (Data Manipulation Language) 
+	príkazy určené na manipuláciu s dátami
+	SELECT, INSERT, DELETE, UPDATE 
+2.	DDL (Data Definition Language) 
+	príkazy určené na definíciu dát, prácu s objektmi
+	CREATE, ALTER, DROP, COMMENT, RENAME, TRUNCATE
+3.	DCL (Data Control Language)
+	určené na riadenie prístupu k objektom a dátam
+	GRANT, REVOKE
+4.	TCL (Transaction Control Language) - určené na riadenie zmien zrealizovaných DML príkazmi
+	COMMIT(potvrdenie zmien), SAVEPOINT, 
+      ROLLBACK(vrátenie sa do pôvodného stavu), SET TRANSACTION NAME
+5.    SPECIAL
+      DESC, ALTER SYSTEM SET, ALTER SESSION SET ....
+
+
+
+
+
+
 
 
 
