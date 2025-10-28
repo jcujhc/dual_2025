@@ -1,0 +1,47 @@
+
+RANNA ROZCVICKA
+-------------------------
+0/ pripojit sa na svoj databazovy server
+1/ Zistite ci vam "bezi" process listener na akom porte je spusteny
+2/ vytvorte usera vo svojej vlastnej databaze
+3/ pomocou pohladu dba_users skuste zistit aky useri boli vytvoreny by default po vytvoreni databazy
+
+
+------------------------------------------------------------------------------------------------------------------
+[oracle@jcuj ~]$ cat .bash_profile
+# User specific environment and startup programs
+export ORACLE_HOME=/u01/app/oracle/product/19c
+export PATH=$PATH:/u01/app/oracle/product/19c/bin
+export ORACLE_SID=tDB2
+alias s+="sqlplus '/as sysdba'"
+
+
+yum install epel*
+dnf install rlwrap
+su - oracle
+vi .bashrc
+alias wm+='sqlplus trulo/start123@//10.202.0.198:51521/tDB1'
+alias r+="rlwrap -H ~/.sqlplus_history sqlplus '/as sysdba'"
+# rlwrap -H ~/.myprogram_history ./myprogram
+. .bashrc
+
+
+rlwrap -H ~/.myprogram_history ./myprogram
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
