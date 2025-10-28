@@ -86,6 +86,135 @@ Základné syntaktické konštrukcie jazyka SQL sa rozdeľujú do 5 zákl. skup�
 
 
 
+Príklad DDL:
+
+CREATE TABLE T_STUDENTS
+( id_zaz number NOT NULL,
+  per_num number NOT NULL,
+  meno varchar2(30) NOT NULL,
+  priezvisko varchar2(30) NOT NULL,
+  email varchar2(60),
+  tel varchar2(20)
+);
+
+
+CREATE TABLE T_ZOZNAM_SKOLENI
+( id_zaz int NOT NULL,
+  kod varchar2(7) NOT NULL,
+  nazov varchar2(100) NOT NULL,
+  online_onside varchar2(6),
+  trvanie varchar2(20),
+  cena number
+);
+
+
+Príklad DML:
+
+SQL – vkladanie dát
+
+INSERT INTO T_STUDENTS VALUES (1,625916,'Alisa','Foreman','alisa.foreman@tele-kom.de','(358) 538-2171');
+INSERT INTO T_STUDENTS VALUES (2,50212,'Benjamin','Lara','benjamin.lara@tele-kom.de','(316) 966-5756');
+INSERT INTO T_STUDENTS VALUES (3,210127,'Ali','Nixon','ali.nixon@tele-kom.de','(277) 335-2112');
+INSERT INTO T_STUDENTS VALUES (4,12569,'Gannon','White','alisa.foreman@tele-kom.de','(322) 688-4744');
+INSERT INTO T_STUDENTS VALUES (5,702678,'Benedict','Gamble','alisa.foreman@tele-kom.de','(296) 381-2674');
+
+
+
+
+
+
+INSERT INTO T_ZOZNAM_SKOLENI VALUES (1,'ED43025','Oracle Database: Develop PL/SQL Programs','online','5 days',1500);
+INSERT INTO T_ZOZNAM_SKOLENI VALUES (2,'ED11000','Linux System Administration','online','3 days',1589);
+INSERT INTO T_ZOZNAM_SKOLENI VALUES (3,'ED78542','ADM950 Secure SAP System Management','online','5 days',2560);
+INSERT INTO T_ZOZNAM_SKOLENI VALUES (4,'ED55796','Oracle WebLogic Server11g: Administration','online','4 days',1156);
+INSERT INTO T_ZOZNAM_SKOLENI VALUES (5,'ED12896','Oracle Database Basics Application Admins','onside','5 days',1486);
+INSERT INTO T_ZOZNAM_SKOLENI VALUES (6,'ED13698','Object-Oriented Analysis and Design UML','online','5 days',2800);
+INSERT INTO T_ZOZNAM_SKOLENI VALUES (7,'ED25487','GitLab – basics and CI/CD administration','online','1 day',386);
+INSERT INTO T_ZOZNAM_SKOLENI VALUES (8,'ED48796','BIT100 - SAP Integration Overview','onside','5 days',3580);
+INSERT INTO T_ZOZNAM_SKOLENI VALUES (9,'ED58975','Analyzing Data with Power BI','onside','2 days',634);
+INSERT INTO T_ZOZNAM_SKOLENI VALUES (10,'ED48213','Linux – Security and network (LNX5)','onside','2 days',720);
+INSERT INTO T_ZOZNAM_SKOLENI VALUES (10,'ED48444','Linux – Security and network (LNX5)','onside','2 days',720);
+
+SQL – aktualizácia dát - UPDATE
+! Podmienka WHERE je nepovinná, ale jej nezadanie vedie k zmene všetkých hodnot v prisluhajúcom stĺpci
+desc T_STUDENTS
+UPDATE T_STUDENTS SET email="benedict.gamble@tele-kom.de" WHERE id_zaz=5; 
+UPDATE T_STUDENTS SET email="benedict.gamble@tele-kom.de";
+UPDATE T_STUDENTS SET email="benedict.gamble@tele-kom.de" WHERE meno="Benedict";
+
+
+SQL – odstránenie dát - DELETE
+! nezadanie klauzuly WHERE vedie k zmazaniu všetkých dát v tabuľke
+DELETE from T_ZOZNAM_SKOLENI;
+DELETE from T_ZOZNAM_SKOLENI where id_zaz=10;
+DELETE from T_ZOZNAM_SKOLENI where kod="ED48444"
+
+DELETE from T_ZOZNAM_SKOLENI;
+- rovnaký výsledok je možné dosiahnuť použitím (TRUNCATE však nie je transakčná operácia, je automaticky potrvrdená/commit-nutá) 
+
+SQL – odstránenie dát - TRUNCATE
+TRUNCATE – DDL príkaz - odstráni všetky riadky z tabuľky 
+CREATE TABLE T_ZOZNAM_SKOLENI_BCK SELECT * from T_ZOZNAM_SKOLENI;
+TRUNCATE TABLE T_ZOZNAM_SKOLENI where id_zaz=10; (?)
+TRUNCATE TABLE T_ZOZNAM_SKOLENI;
+ROLLBACK; (?)
+RENAME TABLE T_ZOZNAM_SKOLENI_BCK TO T_ZOZNAM_SKOLENI;
+DROP TABLE T_ZOZNAM_SKOLENI;
+ROLLBACK; (?)
+RENAME TABLE T_ZOZNAM_SKOLENI_BCK TO T_ZOZNAM_SKOLENI;
+
+
+SQL – zobrazenie dát
+SELECT * from T_ZOZNAM_SKOLENI;
+desc T_ZOZNAM_SKOLENI
+SELECT kod, nazov from T_ZOZNAM_SKOLENI;
+pre každý riadok tabuľky T_ZOZNAM_SKOLENI zobrazí iba údaje zo stĺpcov kod, nazov, cena
+SELECT kod, nazov, cena FROM T_ZOZNAM_SKOLENI;
+
+
+
+SQL – základné operatory
+pri filtrovaní riadkov tabuľky na porovnavanie hodnôt používame operátory:
+relačné operátory:  = , >, <, <>, !=, <=, >= 
+aritmetické operátory:  +, -, * , /, MOD(a,b) 
+|| - spojenie dvoch reťazcov (konkatenácia)
+IS [NOT] NULL - test na hodnotu NULL 
+logické operátory: AND, OR, NOT
+SELECT kod, nazov, cena FROM T_ZOZNAM_SKOLENI WHERE cena > 0;
+SELECT kod, nazov, cena FROM T_ZOZNAM_SKOLENI WHERE cena < 0;
+SELECT kod, nazov, cena FROM T_ZOZNAM_SKOLENI WHERE cena <= 1000;
+
+BETWEEN
+SELECT * FROM T_ZOZNAM_SKOLENI WHERE cena BETWEEN 500 AND 1000;
+IN 
+SELECT * FROM T_ZOZNAM_SKOLENI WHERE kod IN (ED25487, ED25550, ED25000);
+LIKE
+SELECT * FROM T_ZOZNAM_SKOLENI WHERE kod like "ED%";
+SELECT * FROM T_ZOZNAM_SKOLENI WHERE nazov like "%oracle%";
+SELECT * FROM T_ZOZNAM_SKOLENI WHERE nazov like "%Oracle%";
+Poznámka:
+% 	-> skupina ľubovoľných znakov dĺžky 0 až n
+_  	-> jeden ľubovoľný znak
+ULOHY
+1/ pridajte "constraints" k tabulkam
+ALTER TABLE T_ZOZNAM_SKOLENI ADD CONSTRAINT PK_T_ZOZNAM_SKOLENI_ID_ZAZ PRIMARY KEY (ID_ZAZ);
+ALTER TABLE T_STUDENTS ADD CONSTRAINT PK_T_STUDENTS_ID_ZAZ PRIMARY KEY (ID_ZAZ);
+ALTER TABLE T_ZOZNAM_SKOLENI ADD CONSTRAINT UN_T_ZOZNAM_SKOLENI_KOD UNIQUE (KOD);
+ALTER TABLE T_STUDENTS ADD CONSTRAINT UN_T_STUDENTS_PER_NUM UNIQUE (PER_NUM);
+
+2/ vytvorte noveho studenta, teda vlozte novy zaznamm do tabulky T_STUDENTS
+3/ vytvorte nove skolenie v tabulke T_ZOZNAM_SKOLENI
+4/ zmente pri skoleni "GitLab – basics and CI/CD administration" kod skolenia
+   vymyslite si nejaky novy
+
+5/ urobte backup tabulky T_STUDENTS a z tabulky T_STUDENTS vymazte studenta "Alisa Foreman"
+6/ najdite kolko "linux" skoleni mame v tabulke T_ZOZNAM_SKOLENI
+7/ vytvorte novu tabulku T_PRIHLASENY v tvare
+  
+8/ Nahlaste studentov na skolenia , teda vlozte zaznamy do tabulky T_PRIHLASENY (aspon 6 riadkov)
+
+
+
 
 
 
