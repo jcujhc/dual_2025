@@ -39,13 +39,6 @@ ALTER USER TRULO QUOTA 100M ON USERS;
 insert into NIKITA2 values(1);
 commit; / rollback;
 
-
-
- 
-
-
-
-
 ------------------------------------------------------------------------------------------------------------------
 [oracle@jcuj ~]$ cat .bash_profile
 # User specific environment and startup programs
