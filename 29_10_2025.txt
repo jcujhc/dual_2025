@@ -91,9 +91,9 @@ INSERT INTO T_ZOZNAM_SKOLENI VALUES (10,'ED48444','Linux – Security and networ
 SQL – aktualizácia dát - UPDATE
 ! Podmienka WHERE je nepovinná, ale jej nezadanie vedie k zmene všetkých hodnot v prisluhajúcom stĺpci
 desc T_STUDENTS
-UPDATE T_STUDENTS SET email="benedict.gamble@tele-kom.de" WHERE id_zaz=5; 
-UPDATE T_STUDENTS SET email="benedict.gamble@tele-kom.de";
-UPDATE T_STUDENTS SET email="benedict.gamble@tele-kom.de" WHERE meno="Benedict";
+UPDATE T_STUDENTS SET email='benedict.gamble@tele-kom.de' WHERE id_zaz=5; 
+UPDATE T_STUDENTS SET email='benedict.gamble@tele-kom.de';
+UPDATE T_STUDENTS SET email='benedict.gamble@tele-kom.de' WHERE meno='Benedict';
 
 
 SQL – odstránenie dát - DELETE
