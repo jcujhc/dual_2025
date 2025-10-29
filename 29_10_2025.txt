@@ -1,0 +1,15 @@
+RANNA ROZCVICKA
+-------------------------
+0/ pripojit sa na svoj databazovy server
+1/ Vyskusalte si zmenit port listenera (na 52000) .... musite najst listener.ora v ceste $ORACLE_HOME/XXX/YYYY
+2/ pre usera APPADM ktoreho ste vytvorili vcera, grantnite privilegium: create object
+3/ do .bash_profile si pridajte alias: alias a+="rlwrap -H ~/.sqlplus_history_appadm sqlplus appadm/start123"
+
+
+BONUS: pridat do .bash_profile riadky 11-15
+
+echo
+echo ORACLE_HOME = $ORACLE_HOME
+echo ORACLE_SID  = $ORACLE_SID
+echo
+alias | grep sqlplus
