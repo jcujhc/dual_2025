@@ -100,7 +100,7 @@ SQL – odstránenie dát - DELETE
 ! nezadanie klauzuly WHERE vedie k zmazaniu všetkých dát v tabuľke
 DELETE from T_ZOZNAM_SKOLENI;
 DELETE from T_ZOZNAM_SKOLENI where id_zaz=10;
-DELETE from T_ZOZNAM_SKOLENI where kod="ED48444"
+DELETE from T_ZOZNAM_SKOLENI where kod='ED48444';
 
 DELETE from T_ZOZNAM_SKOLENI;
 - rovnaký výsledok je možné dosiahnuť použitím (TRUNCATE však nie je transakčná operácia, je automaticky potrvrdená/commit-nutá) 
@@ -142,9 +142,9 @@ SELECT * FROM T_ZOZNAM_SKOLENI WHERE cena BETWEEN 500 AND 1000;
 IN 
 SELECT * FROM T_ZOZNAM_SKOLENI WHERE kod IN (ED25487, ED25550, ED25000);
 LIKE
-SELECT * FROM T_ZOZNAM_SKOLENI WHERE kod like "ED%";
-SELECT * FROM T_ZOZNAM_SKOLENI WHERE nazov like "%oracle%";
-SELECT * FROM T_ZOZNAM_SKOLENI WHERE nazov like "%Oracle%";
+SELECT * FROM T_ZOZNAM_SKOLENI WHERE kod like 'ED%';
+SELECT * FROM T_ZOZNAM_SKOLENI WHERE nazov like '%oracle%';
+SELECT * FROM T_ZOZNAM_SKOLENI WHERE nazov like '%Oracle%';
 Poznámka:
 % 	-> skupina ľubovoľných znakov dĺžky 0 až n
 _  	-> jeden ľubovoľný znak
