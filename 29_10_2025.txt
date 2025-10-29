@@ -13,3 +13,11 @@ echo ORACLE_HOME = $ORACLE_HOME
 echo ORACLE_SID  = $ORACLE_SID
 echo
 alias | grep sqlplus
+
+## ----------------------------------------------------------------------------------------------------------- ##
+
+
+
+
+
+
