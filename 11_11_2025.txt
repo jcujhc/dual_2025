@@ -22,6 +22,19 @@ echo
 alias | grep sqlplus
 
 --------------------------------------------------------------------------------------------------------------------------------
+# STOP LISTENER (status|start)
+lsnrctl stop LISTENER_tDB2
+
+# Pozretie kto je prihlaseny do databazy
+select username,MACHINE,MODULE,SID,SERIAL# from v$session where username like 'APPADM'
+
+#  EZconnect 
+sqlplus appadm/STart123@//10.202.0.198:51521/tDB2
+/u01/app/oracle/product/19c/bin/sqlplus appadm/STart123@//10.202.0.198:51521/tDB2
+rlwrap -H ~/.sqlplus_history_XXX sqlplus appadm/STart123@//10.202.0.198:51521/tDB2
+ 
+
+
 1. -----------------------
 echo $ORACLE_HOME
 cd $ORACLE_HOME
