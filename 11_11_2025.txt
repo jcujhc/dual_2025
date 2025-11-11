@@ -1,3 +1,27 @@
+[oracle@jcuj ~]$ vi .bash_profile
+
+# .bash_profile
+
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+        . ~/.bashrc
+fi
+
+# User specific environment and startup programs
+export ORACLE_HOME=/u01/app/oracle/product/19c
+export PATH=$PATH:/u01/app/oracle/product/19c/bin
+export ORACLE_SID=tDB2
+alias s+="sqlplus '/as sysdba'"
+alias r+="rlwrap -H ~/.sqlplus_history sqlplus '/as sysdba'"
+alias a+="rlwrap -H ~/.sqlplus_history_appadm sqlplus appadm/STart123"
+
+echo
+echo ORACLE_HOME = $ORACLE_HOME
+echo ORACLE_SID  = $ORACLE_SID
+echo
+alias | grep sqlplus
+
+--------------------------------------------------------------------------------------------------------------------------------
 1. -----------------------
 echo $ORACLE_HOME
 cd $ORACLE_HOME
