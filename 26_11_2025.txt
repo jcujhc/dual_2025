@@ -1,0 +1,241 @@
+# sqlplus / as sysdba
+s+
+
+#skolntrolovat priecinok: ls -la /u01/app/oracle/product/data2
+
+CREATE TABLESPACE DUAL2024 DATAFILE '/u01/app/oracle/product/data2/dual2024.dbf' SIZE 10M;
+
+set lines 200
+col FILE_NAME format a60
+select FILE_NAME, FILE_ID, BYTES/1024/1024 MB, TABLESPACE_NAME from dba_data_files;
+
+CREATE USER USER_DUAL IDENTIFIED BY 'start123' default tablespace DUAL2024;
+desc dba_users;
+
+grant connect to USER_DUAL; 
+grant create table to USER_DUAL; 
+grant create_object to USER_DUAL; 
+alter user USER_DUAL  quota unlimited on DUAL2024;
+
+connect USER_DUAL (start123)
+
+set lines 200 pages 500
+col OBJECT_NAME for a40
+col OWNER for a5
+select OBJECT_NAME,OBJECT_TYPE from user_objects;
+
+SELECT SUM(bytes)/1024/1024 AS "Table Size (MB)" FROM user_segments WHERE segment_name='your_table_name';
+SELECT SEGMENT_NAME,SUM(bytes)/1024/1024 AS "Table Size (MB)" FROM user_segments WHERE segment_name='your_table_name' group by segment_name;
+SELECT SEGMENT_NAME,SUM(bytes)/1024/1024 AS "Table Size (MB)" FROM user_segments group by segment_name;
+
+
+AS SYSDBA:
+---------------------------
+set lines 200 pages 500
+col OBJECT_NAME for a40
+col OWNER for a5
+select OWNER,OBJECT_NAME,OBJECT_TYPE from dba_objects where owner in ('HR');
+
+sqlplus USER_DUAL/start123
+
+# CREATE TABLE TEST as SELECT a.* from all_objects a,all_objects b;
+set time on timing on echo on
+CREATE TABLE TEST as SELECT a.* from all_tables a,all_tables b;
+SELECT SEGMENT_NAME,SUM(bytes)/1024/1024 AS "Table Size (MB)" FROM user_segments WHERE segment_name='&your_table_name' group by segment_name;
+
+
+# vytvorme si script: vi /tmp/create_table.sql
+spool /tmp/create_table.log
+set time on timing on echo on
+CREATE TABLE TEST1 as SELECT a.* from all_tables a,all_tables b;
+CREATE TABLE TEST2 as SELECT a.* from all_tables a,all_tables b;
+CREATE TABLE TEST3 as SELECT a.* from all_tables a,all_tables b;
+CREATE TABLE TEST4 as SELECT a.* from all_tables a,all_tables b;
+CREATE TABLE TEST5 as SELECT a.* from all_tables a,all_tables b;
+CREATE TABLE TEST6 as SELECT a.* from all_tables a,all_tables b;
+CREATE TABLE TEST7 as SELECT a.* from all_tables a,all_tables b;
+CREATE TABLE TEST8 as SELECT a.* from all_tables a,all_tables b;
+CREATE TABLE TEST9 as SELECT a.* from all_tables a,all_tables b;
+CREATE TABLE TEST10 as SELECT a.* from all_tables a,all_tables b;
+exit;
+
+# sqlplus USER_DUAL/start123 @/tmp/create_table.sql
+SQL> @/tmp/create_table.sql
+SELECT SEGMENT_NAME,SUM(bytes)/1024/1024 AS "Table Size (MB)" FROM user_segments group by segment_name;
+
+
+ZALOHA
+--------------------------------
+AS SYSDBA
+select * from dba_directories;
+expdp \'/ as sysdba\' dumpfile=expdp_USER_DUAL.dmp directory=EXPORTDIR schemas=USER_DUAL log=expdp.log
+
+
+TODO
+---------------------------------------------------------------------------------------
+sqlplus USER_DUAL/start123
+desc TEST
+select count(*) from TEST;
+select * from TEST where rownum<2;
+select OWNER, TABLE_NAME from TEST where OWNER like 'HR';
+select OWNER, TABLE_NAME from TEST where OWNER like 'USER_DUAL';
+# delete from TEST;
+delete from TEST8;
+as sysdba: --> s+ @dbspace.sql
+as sysdba: --> select FILE_NAME, FILE_ID, BYTES/1024/1024 MB, TABLESPACE_NAME from dba_data_files;
+# DROP 
+drop table TEST;
+as sysdba: --> s+ @dbspace.sql
+as sysdba: --> select FILE_NAME, FILE_ID, BYTES/1024/1024 MB, TABLESPACE_NAME from dba_data_files;
+# TRUNCATE 
+truncate table TEST3;
+as sysdba: --> s+ @dbspace.sql
+as sysdba: --> select FILE_NAME, FILE_ID, BYTES/1024/1024 MB, TABLESPACE_NAME from dba_data_files;
+
+
+
+OBJEKTY SCHEMY/USERA
+---------------------------------------------------------------------------------
+set lines 200
+set lines 200
+col OBJECT_NAME for a40
+select OWNER,OBJECT_NAME,OBJECT_TYPE from dba_objects where owner in ('HR');
+
+## https://oracle-base.com/dba/script?category=script_creation&file=view_ddl.sql
+
+SELECT DBMS_METADATA.get_ddl ('INDEX', index_name, owner)
+FROM   all_indexes
+WHERE  owner      = UPPER('&1')
+AND    table_name = DECODE(UPPER('&2'), 'ALL', table_name, UPPER('&2'));
+
+
+EXPDP / IMPDP
+--------------------------------------------------------------------------------------------------------
+--> expdp prezentacia
+--> expdp priklady
+mkdir /u01/app/oracle/product/export
+ls -ltr /u01/app/oracle/product/export
+
+sqlplus / as sysdba
+create or replace directory EXPORTDIR as '/u01/app/oracle/product/export';
+grant read, write on directory EXPORTDIR to HR;
+grant read, write on directory EXPORTDIR to USER_DUAL;
+
+set lines 200
+set lines 200
+col OBJECT_NAME for a40
+select OBJECT_NAME,OBJECT_TYPE from user_objects;
+
+expdp HR/start123 dumpfile=HR_schema.dmp logfile=HR_schema.log tables=REGIONS directory=EXPORTDIR
+expdp HR/start123 dumpfile=HR_schema.dmp logfile=HR_schema.log directory=EXPORTDIR
+expdp \'/ as sysdba\' dumpfile=expdp_USER_DUAL.dmp directory=EXPORTDIR schemas=USER_DUAL log=expdp.log
+
+# EXPDP použitím par file
+file: mojexport.par
+USERID=HR/start123
+DIRECTORY=EXPORTDIR
+DUMPFILE=expdp_db.20241029.dmp
+LOGFILE=expdp_db.20241029.log
+SCHEMAS=HR
+# or TABLES=EMPLOYEES, DEPARTMENTS, REGIONS
+
+$ expdp parfile=mojexport.par
+
+--> impdp
+impdp HR/start dumpfile=HR_schema.dmp logfile=HR_schema.log tables=REGIONS directory=EXPORTDIR
+
+--> impdp parfile
+vi import.par
+USERID=SYSTEM/start123
+DIRECTORY=EXPORTDIR
+DUMPFILE=expdp_db.20241112.dmp
+LOGFILE=impdp_db.20241112.log
+TABLE_EXISTS_ACTION=REPLACE
+REMAP_SCHEMA=HR:HR2
+# or TABLES=EMPLOYEES, DEPARTMENTS, REGIONS
+
+$ impdp parfile=import.par
+
+IMPDP
+$ impdp HR/start123@tDB1 dumpfile=expdp_db.20241029.dmp LOGFILE=impdp_db.20241029.log directory=EXPORTDIR tables=REGIONS
+$ impdp SYSTEM/start123 sqlfile=ddl.sql dumpfile=expdp_USER_DUAL.dmp directoriy=EXPORTDIR
+
+table_exists_action je použitá pri impdp keď tabuľka už existuje v DB                 
+table_exists_action=skip:  ignoruj data v import file a nechaj existujúcu tabuľku nedotknutú. Toto je default option a neplatí pri nastavení  content=data_only.
+table_exists_action=append:  týmto sa povie, pridaj exportované dá do existujúcej tabuľky, nechaj exist. riadny a pridaj nové.
+table_exists_action=truncate:  toto nám vraví, truncate existujúcu tabuľku, ponechaj štruktúru a importni riadky z dump file. Pri použití tejto option nesmie existovat  referenčné integrita (constraints) na cieľovej tabuľke.  
+table_exists_action=replace:  toto nám vraví, zmaž celú tabuľku a nahraď definíciu a riadky tabuľky 
+
+DALSIE MOZNOSTI IMPDP
+--------------------------------------------------------------
+TABLE_EXISTS_ACTION = {SKIP | APPEND | TRUNCATE | REPLACE}
+INCLUDE=
+EXCLUDE=TABLES:
+REMAP_SCHEMA=HR:HR2
+REMAP_TABLESPACE=SYSAUX:DATA
+
+AS SYSDBA
+expdp \'/ as sysdba\' dumpfile=expdp_SCH_STUDENT15_24052023.dmp directory=DPDIR schemas=STUDENT15 log=expdp.log
+SQL> create tablespace NEW_TBS datafile '/u01/app/oracle/product/data2/new_tbs_01.dbf' size 5G;
+impdp \"/ as sysdba\" dumpfile=expdp_SCH_STUDENT15_24052023.dmp directory=DPDIR schemas=STUDENT15 log=expdp.log REMAP_SCHEMA=STUDENT15:IKDB REMAP_TABLESPACE=USERS:NEW_TBS
+
+
+REMOTE EXPORT
+--------------------------------------------------------------
+expdp user@TNSNAMES_RECORD dumpfile=XXX.dmp directory=DPDIR schemas=??? log=expdp.log
+
+## ADSmain
+## select users from MAIN DATABASE
+col USERNAME for a30
+set lines 200 pages 100
+select username,created from dba_users where ORACLE_MAINTAINED='N' order by 1;
+select username, to_char(created , 'dd.mm.yyyy hh24:mi:ss') from dba_users where ORACLE_MAINTAINED='N' order by 1;
+
+## ADSmain
+create or replace directory EXP_ADSmain as '/u01/app/oracle/product/export';
+
+
+OPATCH
+--------------------------------------------------------------
+## https://dbsguru.com/oracle-critical-database-patch-july-2024/
+## https://oracledbwr.com/oracle-release-schedule-of-current-database-releases/
+## https://endoflife.date/oracle-database
+## https://redresscompliance.com/evolution-of-oracle-database-versions-all-major-releases/#Oracle_Database_19c
+
+precheck
+----------------------------------
+desc v$database
+select NAME, CREATED ... from
+SELECT PATCH_ID,PATCH_UID,PATCH_TYPE,ACTION,STATUS,ACTION_TIME,DESCRIPTION from dba_registry_sqlpatch;
+
+/u01/app/oracle/product/19c/OPatch/opatch lsinventory
+/u01/app/oracle/product/19c/OPatch/opatch lspatches
+$ORACLE_HOME/OPatch/opatch version
+
+# sqlplus / as sysdba
+s+
+shu immediate
+exit
+
+# check LISTENER
+ps -ef | grep tns
+lsnrctl status LISTENER_tDB1
+# ak neviem ako sa vola listener kde najdem konfigurak ??
+
+cd $ORACLE_HOME
+mv OPatch/ OPatch_ver_XXX
+unzip p6880880_190000_Linux-x86-64.zip -d $ORACLE_HOME
+$ORACLE_HOME/OPatch/opatch lsinventory
+unzip p31281355_190000_Linux-x86-64.zip
+cd 31281355
+opatch apply
+./datapatch -verbose
+
+/u01/app/oracle/product/19c/OPatch/opatch lsinventory
+SELECT PATCH_ID,PATCH_UID,PATCH_TYPE,ACTION,STATUS,ACTION_TIME,DESCRIPTION from dba_registry_sqlpatch;
+
+# startDB
+
+# start LISTENER
+
+# check ci sa viem remotne prihlasit do databazy ako applikacny user
