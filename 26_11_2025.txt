@@ -3,19 +3,18 @@ s+
 
 #skolntrolovat priecinok: ls -la /u01/app/oracle/product/data2
 
-CREATE TABLESPACE DUAL2024 DATAFILE '/u01/app/oracle/product/data2/dual2024.dbf' SIZE 10M;
+CREATE TABLESPACE DUAL2025 DATAFILE '/u01/app/oracle/product/data2/dual2024.dbf' SIZE 5G;
 
 set lines 200
 col FILE_NAME format a60
 select FILE_NAME, FILE_ID, BYTES/1024/1024 MB, TABLESPACE_NAME from dba_data_files;
 
-CREATE USER USER_DUAL IDENTIFIED BY 'start123' default tablespace DUAL2024;
+CREATE USER USER_DUAL IDENTIFIED BY 'start123' default tablespace DUAL2025;
 desc dba_users;
 
 grant connect to USER_DUAL; 
 grant create table to USER_DUAL; 
-grant create_object to USER_DUAL; 
-alter user USER_DUAL  quota unlimited on DUAL2024;
+alter user USER_DUAL quota unlimited on DUAL2025;
 
 connect USER_DUAL (start123)
 
@@ -66,8 +65,12 @@ SELECT SEGMENT_NAME,SUM(bytes)/1024/1024 AS "Table Size (MB)" FROM user_segments
 
 ZALOHA
 --------------------------------
+mkdir /u01/app/oracle/product/export
+
 AS SYSDBA
 select * from dba_directories;
+create or replace directory EXPORTDIR as '/u01/app/oracle/product/export';
+
 expdp \'/ as sysdba\' dumpfile=expdp_USER_DUAL.dmp directory=EXPORTDIR schemas=USER_DUAL log=expdp.log
 
 
@@ -79,10 +82,12 @@ select count(*) from TEST;
 select * from TEST where rownum<2;
 select OWNER, TABLE_NAME from TEST where OWNER like 'HR';
 select OWNER, TABLE_NAME from TEST where OWNER like 'USER_DUAL';
+
 # delete from TEST;
 delete from TEST8;
 as sysdba: --> s+ @dbspace.sql
 as sysdba: --> select FILE_NAME, FILE_ID, BYTES/1024/1024 MB, TABLESPACE_NAME from dba_data_files;
+
 # DROP 
 drop table TEST;
 as sysdba: --> s+ @dbspace.sql
@@ -94,7 +99,7 @@ as sysdba: --> select FILE_NAME, FILE_ID, BYTES/1024/1024 MB, TABLESPACE_NAME fr
 
 
 
-OBJEKTY SCHEMY/USERA
+OBJEKTY SCHEMY/USERA   --> as sysdba
 ---------------------------------------------------------------------------------
 set lines 200
 set lines 200
@@ -134,8 +139,8 @@ expdp \'/ as sysdba\' dumpfile=expdp_USER_DUAL.dmp directory=EXPORTDIR schemas=U
 file: mojexport.par
 USERID=HR/start123
 DIRECTORY=EXPORTDIR
-DUMPFILE=expdp_db.20241029.dmp
-LOGFILE=expdp_db.20241029.log
+DUMPFILE=expdp_db.20251126.dmp
+LOGFILE=expdp_db.20251126.log
 SCHEMAS=HR
 # or TABLES=EMPLOYEES, DEPARTMENTS, REGIONS
 
@@ -148,8 +153,8 @@ impdp HR/start dumpfile=HR_schema.dmp logfile=HR_schema.log tables=REGIONS direc
 vi import.par
 USERID=SYSTEM/start123
 DIRECTORY=EXPORTDIR
-DUMPFILE=expdp_db.20241112.dmp
-LOGFILE=impdp_db.20241112.log
+DUMPFILE=expdp_db.20251126.dmp
+LOGFILE=impdp_db.20251126.log
 TABLE_EXISTS_ACTION=REPLACE
 REMAP_SCHEMA=HR:HR2
 # or TABLES=EMPLOYEES, DEPARTMENTS, REGIONS
@@ -157,7 +162,7 @@ REMAP_SCHEMA=HR:HR2
 $ impdp parfile=import.par
 
 IMPDP
-$ impdp HR/start123@tDB1 dumpfile=expdp_db.20241029.dmp LOGFILE=impdp_db.20241029.log directory=EXPORTDIR tables=REGIONS
+$ impdp HR/start123@tDB1 dumpfile=expdp_db.20251126.dmp LOGFILE=impdp_db.20241029.log directory=EXPORTDIR tables=REGIONS
 $ impdp SYSTEM/start123 sqlfile=ddl.sql dumpfile=expdp_USER_DUAL.dmp directoriy=EXPORTDIR
 
 table_exists_action je použitá pri impdp keď tabuľka už existuje v DB                 
@@ -174,68 +179,11 @@ EXCLUDE=TABLES:
 REMAP_SCHEMA=HR:HR2
 REMAP_TABLESPACE=SYSAUX:DATA
 
+REMAP_TABLESPACE
+---------------------------
 AS SYSDBA
-expdp \'/ as sysdba\' dumpfile=expdp_SCH_STUDENT15_24052023.dmp directory=DPDIR schemas=STUDENT15 log=expdp.log
+expdp \'/ as sysdba\' dumpfile=expdp_HR_20251126.dmp directory=DPDIR schemas=HR log=expdp.log
+
 SQL> create tablespace NEW_TBS datafile '/u01/app/oracle/product/data2/new_tbs_01.dbf' size 5G;
-impdp \"/ as sysdba\" dumpfile=expdp_SCH_STUDENT15_24052023.dmp directory=DPDIR schemas=STUDENT15 log=expdp.log REMAP_SCHEMA=STUDENT15:IKDB REMAP_TABLESPACE=USERS:NEW_TBS
+impdp \"/ as sysdba\" dumpfile=expdp_HR_20251126.dmp directory=DPDIR schemas=HR log=expdp.log REMAP_SCHEMA=HR:IKDB REMAP_TABLESPACE=USERS:NEW_TBS
 
-
-REMOTE EXPORT
---------------------------------------------------------------
-expdp user@TNSNAMES_RECORD dumpfile=XXX.dmp directory=DPDIR schemas=??? log=expdp.log
-
-## ADSmain
-## select users from MAIN DATABASE
-col USERNAME for a30
-set lines 200 pages 100
-select username,created from dba_users where ORACLE_MAINTAINED='N' order by 1;
-select username, to_char(created , 'dd.mm.yyyy hh24:mi:ss') from dba_users where ORACLE_MAINTAINED='N' order by 1;
-
-## ADSmain
-create or replace directory EXP_ADSmain as '/u01/app/oracle/product/export';
-
-
-OPATCH
---------------------------------------------------------------
-## https://dbsguru.com/oracle-critical-database-patch-july-2024/
-## https://oracledbwr.com/oracle-release-schedule-of-current-database-releases/
-## https://endoflife.date/oracle-database
-## https://redresscompliance.com/evolution-of-oracle-database-versions-all-major-releases/#Oracle_Database_19c
-
-precheck
-----------------------------------
-desc v$database
-select NAME, CREATED ... from
-SELECT PATCH_ID,PATCH_UID,PATCH_TYPE,ACTION,STATUS,ACTION_TIME,DESCRIPTION from dba_registry_sqlpatch;
-
-/u01/app/oracle/product/19c/OPatch/opatch lsinventory
-/u01/app/oracle/product/19c/OPatch/opatch lspatches
-$ORACLE_HOME/OPatch/opatch version
-
-# sqlplus / as sysdba
-s+
-shu immediate
-exit
-
-# check LISTENER
-ps -ef | grep tns
-lsnrctl status LISTENER_tDB1
-# ak neviem ako sa vola listener kde najdem konfigurak ??
-
-cd $ORACLE_HOME
-mv OPatch/ OPatch_ver_XXX
-unzip p6880880_190000_Linux-x86-64.zip -d $ORACLE_HOME
-$ORACLE_HOME/OPatch/opatch lsinventory
-unzip p31281355_190000_Linux-x86-64.zip
-cd 31281355
-opatch apply
-./datapatch -verbose
-
-/u01/app/oracle/product/19c/OPatch/opatch lsinventory
-SELECT PATCH_ID,PATCH_UID,PATCH_TYPE,ACTION,STATUS,ACTION_TIME,DESCRIPTION from dba_registry_sqlpatch;
-
-# startDB
-
-# start LISTENER
-
-# check ci sa viem remotne prihlasit do databazy ako applikacny user
