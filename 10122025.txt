@@ -3,11 +3,159 @@ RANNA ROZCVICKA
 1/ prihlasit sa do db ako SYS a zistit akych userov mame v DB
 2/ zistit aky maju default tablespace
 3/ zistit ake maju tabulky a ich velkost
+SELECT SUM(bytes)/1024/1024 AS "Table Size (MB)" FROM user_segments WHERE segment_name='&your_table_name';
 4/ resetnut heslo userovi
 5/ zistit velkost FS
 6/ zistit ci nam bezi listener
 7/ spustit script
 --------------------------------------------------------------------
+
+SCRIPT
+-----------
+# vi big_table.sql
+
+create table big_table
+as
+select rownum id,
+               OWNER, OBJECT_NAME, SUBOBJECT_NAME,
+               OBJECT_ID, DATA_OBJECT_ID,
+               OBJECT_TYPE, CREATED, LAST_DDL_TIME,
+               TIMESTAMP, STATUS, TEMPORARY,
+               GENERATED, SECONDARY
+  from all_objects a
+ where 1=0
+/
+alter table big_table nologging;
+
+declare
+    l_cnt number;
+    l_rows number := &1;
+begin
+    insert /*+ append */
+    into big_table
+    select rownum,
+               OWNER, OBJECT_NAME, SUBOBJECT_NAME,
+               OBJECT_ID, DATA_OBJECT_ID,
+               OBJECT_TYPE, CREATED, LAST_DDL_TIME,
+               TIMESTAMP, STATUS, TEMPORARY,
+               GENERATED, SECONDARY
+      from all_objects a
+     where rownum <= &1;
+
+    l_cnt := sql%rowcount;
+
+    commit;
+
+    while (l_cnt < l_rows)
+    loop
+        insert /*+ APPEND */ into big_table
+        select rownum+l_cnt,
+               OWNER, OBJECT_NAME, SUBOBJECT_NAME,
+               OBJECT_ID, DATA_OBJECT_ID,
+               OBJECT_TYPE, CREATED, LAST_DDL_TIME,
+               TIMESTAMP, STATUS, TEMPORARY,
+               GENERATED, SECONDARY
+          from big_table
+         where rownum <= l_rows-l_cnt;
+        l_cnt := l_cnt + sql%rowcount;
+        commit;
+    end loop;
+end;
+/
+
+alter table big_table add constraint big_table_pk primary key(id)
+/
+
+begin
+   dbms_stats.gather_table_stats
+   ( ownname    => user,
+     tabname    => 'BIG_TABLE' )
+     cascade    => TRUE );
+end;
+/
+-- select count(*) from big_table;
+
+@big_table.sql
+
+
+
+# vytvorme si script: vi /tmp/create_table.sql
+spool /tmp/create_table.log
+set time on timing on echo on
+CREATE TABLE big_table_2 as SELECT * from big_table;
+spool off
+
+
+BACKUP
+
+SQL> archive log list;
+SQL>  alter system set db_recovery_file_dest_size=10g;
+SQL> alter system set db_recovery_file_dest='/u01/app/oracle/product/backups';
+RMAN target /
+backup database plus archivelog all delete input;
+
+
+EXPDP / IMPDP
+--------------------------------------------------------------------------------------------------------
+--> expdp prezentacia
+--> expdp priklady
+mkdir /u01/app/oracle/product/export
+ls -ltr /u01/app/oracle/product/export
+
+sqlplus / as sysdba
+create or replace directory EXPORTDIR as '/u01/app/oracle/product/export';
+grant read, write on directory EXPORTDIR to HR;
+grant read, write on directory EXPORTDIR to USER_DUAL;
+
+set lines 200
+set lines 200
+col OBJECT_NAME for a40
+select OBJECT_NAME,OBJECT_TYPE from user_objects;
+
+expdp HR/start123 dumpfile=HR_schema.dmp logfile=HR_schema.log tables=REGIONS directory=EXPORTDIR
+expdp HR/start123 dumpfile=HR_schema.dmp logfile=HR_schema.log directory=EXPORTDIR
+expdp \'/ as sysdba\' dumpfile=expdp_USER_DUAL.dmp directory=EXPORTDIR schemas=USER_DUAL log=expdp.log
+
+# EXPDP použitím par file
+file: mojexport.par
+USERID=HR/start123
+DIRECTORY=EXPORTDIR
+DUMPFILE=expdp_db.20241029.dmp
+LOGFILE=expdp_db.20241029.log
+SCHEMAS=HR
+# or TABLES=EMPLOYEES, DEPARTMENTS, REGIONS
+
+$ expdp parfile=mojexport.par
+
+--> impdp
+impdp HR/start dumpfile=HR_schema.dmp logfile=HR_schema.log tables=REGIONS directory=EXPORTDIR
+
+--> impdp parfile
+vi import.par
+USERID=SYSTEM/start123
+DIRECTORY=EXPORTDIR
+DUMPFILE=expdp_db.20241112.dmp
+LOGFILE=impdp_db.20241112.log
+TABLE_EXISTS_ACTION=REPLACE
+REMAP_SCHEMA=HR:HR2
+# or TABLES=EMPLOYEES, DEPARTMENTS, REGIONS
+
+$ impdp parfile=import.par
+
+IMPDP
+$ impdp HR/start123@tDB1 dumpfile=expdp_db.20241029.dmp LOGFILE=impdp_db.20241029.log directory=EXPORTDIR tables=REGIONS
+$ impdp SYSTEM/start123 sqlfile=ddl.sql dumpfile=expdp_USER_DUAL.dmp directoriy=EXPORTDIR
+
+table_exists_action je použitá pri impdp keď tabuľka už existuje v DB                 
+table_exists_action=skip:  ignoruj data v import file a nechaj existujúcu tabuľku nedotknutú. Toto je default option a neplatí pri nastavení  content=data_only.
+table_exists_action=append:  týmto sa povie, pridaj exportované dá do existujúcej tabuľky, nechaj exist. riadny a pridaj nové.
+table_exists_action=truncate:  toto nám vraví, truncate existujúcu tabuľku, ponechaj štruktúru a importni riadky z dump file. Pri použití tejto option nesmie existovat  referenčné integrita (constraints) na cieľovej tabuľke.  
+table_exists_action=replace:  toto nám vraví, zmaž celú tabuľku a nahraď definíciu a riadky tabuľky 
+
+
+
+
+
 
 
 
