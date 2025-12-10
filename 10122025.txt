@@ -1,0 +1,13 @@
+RANNA ROZCVICKA
+---------------------------------
+1/ prihlasit sa do db ako SYS a zistit akych userov mame v DB
+2/ zistit aky maju default tablespace
+3/ zistit ake maju tabulky a ich velkost
+4/ resetnut heslo userovi
+5/ zistit velkost FS
+6/ zistit ci nam bezi listener
+7/ spustit script
+--------------------------------------------------------------------
+
+
+
